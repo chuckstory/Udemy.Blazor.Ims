@@ -10,4 +10,10 @@
     <ProjectReference Include="..\IMS.CoreBusiness\IMS.CoreBusiness.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Activities\Interfaces\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Activities\Interfaces\" />
+  </ItemGroup>
 </Project>

@@ -37,7 +37,7 @@ namespace IMS.Plugins.InMemory
         {
             if (string.IsNullOrWhiteSpace(name)) return await Task.FromResult(_inventories);
 
-            return await Task.FromResult(_inventories.Where(i => i.InventoryName.Contains(name, StringComparison.OrdinalIgnoreCase)));
+            return _inventories.Where(i => i.InventoryName.Contains(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<Inventory> GetInventoryByIdAsync(int inventoryId)

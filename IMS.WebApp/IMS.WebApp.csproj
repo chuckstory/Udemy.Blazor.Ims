@@ -15,5 +15,11 @@
 
   <ItemGroup>
     <None Remove="Controls\" />
+    <None Remove="Controls\Common\" />
+    <None Remove="ViewModels\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controls\Common\" />
+    <Folder Include="ViewModels\" />
   </ItemGroup>
 </Project>

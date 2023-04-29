@@ -1,3 +1,8 @@
+using System.Text;
+using System.Reflection.Emit;
+using System.Reflection.Metadata;
+using System;
+using System.Collections.Immutable;
 using IMS.Plugins.InMemory;
 using IMS.UseCases.Inventories;
 using IMS.UseCases.Inventories.Interfaces;
@@ -7,6 +12,8 @@ using IMS.UseCases.Products.Interfaces;
 using IMS.WebApp.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using IMS.UseCases.Activities;
+using IMS.UseCases.Activities.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +24,7 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
+builder.Services.AddSingleton<IInventoryTransactionRepository, InventoryTransactionRepository>();
 
 builder.Services.AddTransient<IViewInventoriesByNameUseCase, ViewInventoriesByNameUseCase>();
 builder.Services.AddTransient<IAddInventoryUseCase, AddInventoryUseCase>();
@@ -25,6 +33,10 @@ builder.Services.AddTransient<IViewInventoryByIdUseCase, ViewInventoryByIdUseCas
 
 builder.Services.AddTransient<IViewProductsByNameUseCase, ViewProductsByNameUseCase>();
 builder.Services.AddTransient<IAddProductUseCase, AddProductUseCase>();
+builder.Services.AddTransient<IViewProductByIdUseCase, ViewProductByIdUseCase>();
+builder.Services.AddTransient<IEditProductUseCase, EditProductUseCase>();
+
+builder.Services.AddTransient<IPurchaseInventoryUseCase, PurchaseInventoryUseCase>();
 
 var app = builder.Build();
 
