@@ -4,6 +4,9 @@
 @inject IViewInventoryByIdUseCase ViewInventoryByIdUseCase
 @inject IEditInventoryUseCase EditInventoryUseCase
 
+
+@attribute [Authorize(Policy = "Inventory")]
+
 <h3>EditInventory</h3>
 <br />
 <EditForm Model="inventory" OnValidSubmit="SaveInventory">

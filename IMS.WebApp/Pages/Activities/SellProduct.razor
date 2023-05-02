@@ -44,19 +44,19 @@
     <button type="submit" class="btn btn-primary">Sell</button>
 </EditForm>
 @code {
-    @* private AuthenticationState? authenticationState;
+    private AuthenticationState? authenticationState;
 
     [CascadingParameter]
-    private Task<AuthenticationState>? authenticationStateTask { get; set; } *@
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
 
     private SellViewModel sellViewModel = new SellViewModel();
     private Product? selectedProduct = null;
 
-    @* protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         if (authenticationStateTask != null)
             authenticationState = await authenticationStateTask;
-    } *@
+    }
 
     protected override void OnAfterRender(bool firstRender)
     {

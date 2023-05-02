@@ -6,6 +6,11 @@
 @inject IViewInventoriesByNameUseCase ViewInventoriesByNameUseCase
 @inject IViewInventoryByIdUseCase ViewInventoryByIdUseCase
 
+
+@inject IJSRuntime JSRuntime
+
+@attribute [Authorize(Policy = "Purchasers")]
+
 <h3>Purchase Inventory</h3>
 <br />
 <EditForm Model="purchaseViewModel" OnValidSubmit="Purchase">
@@ -47,18 +52,44 @@
 </EditForm>
 
 @code {
-    private PurchaseViewModel purchaseViewModel = new PurchaseViewModel();
+    private AuthenticationState? authenticationState;
 
-    private Inventory selectedInventory = null;
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+
+    private PurchaseViewModel purchaseViewModel = new PurchaseViewModel();
+    private Inventory? selectedInventory = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationStateTask != null)
+            authenticationState = await authenticationStateTask;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        if (firstRender)
+        {
+            JSRuntime.InvokeVoidAsync("PreventFormSubmition", "purchase-form");
+        }
+    }
 
     private async Task Purchase()
     {
-        await PurchaseInventoryUseCase.ExecuteAsync(
-            this.purchaseViewModel.PONumber,
-            this.selectedInventory,
-            this.purchaseViewModel.QuantityToPurchase,
-            "Poowadon"
-        );
+        if (this.selectedInventory != null &&
+            authenticationState != null &&
+            !string.IsNullOrWhiteSpace(authenticationState.User?.Identity?.Name)
+        )
+        {
+            await PurchaseInventoryUseCase.ExecuteAsync(
+                this.purchaseViewModel.PONumber,
+                this.selectedInventory,
+                this.purchaseViewModel.QuantityToPurchase,
+                authenticationState.User.Identity.Name
+            );
+        }
 
         this.purchaseViewModel = new PurchaseViewModel();
         this.selectedInventory = null;
