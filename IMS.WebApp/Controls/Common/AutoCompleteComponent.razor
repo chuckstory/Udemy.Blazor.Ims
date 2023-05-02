@@ -1,47 +1,37 @@
-﻿
-
-<div class="form-group">
+﻿<div class="form-group">
     <label for="search">@Label</label>
-    <input
-        type="text"
-        class="form-control"
-           @bind-value="userInput"
-           @bind-value:event="oninput"
-           @onkeyup="OnPressKey"
-      />
+    <input type="text"
+           class="form-control"
+           value="@_userInput"
+           @oninput="@(async (args) => {await OnInput(args);})"
+           @onkeyup="OnPressKeys" />
 </div>
-
-@if (searchResults is not null && searchResults.Count > 0)
+@if (searchResults != null && searchResults.Count > 0)
 {
-        <div class="search-result">
-            <ul>
-                @{      
-                    int itemIndex = 0;
-                    foreach (var item in searchResults)
-                    {
-                    <li
-                        @key="item.Id"
+    <div class="search-result">
+        <ul>
+            @{
+                int itemIndex = 0;
+                foreach (var item in searchResults)
+                {
+                    <li @key="item.Id"
                         class="@(itemIndex == currentItemIndex?"selected":"")"
-                        @onclick="@(() => OnSelectItem(item))"
-                    >
+                        @onclick="@(()=>OnSelectItem(item))">
                         @item.Name
                     </li>
-                        itemIndex++;
-                    }
+                    itemIndex++;
                 }
-            </ul>
-        </div>
-
+            }
+        </ul>
+    </div>
 }
 
-
 @code {
-
     [Parameter]
     public string Label { get; set; } = string.Empty;
 
     [Parameter]
-    public Func<string, List<ItemViewModel>>? SearchFunction { get; set; }
+    public Func<string, Task<List<ItemViewModel>>>? SearchFunction { get; set; }
 
     [Parameter]
     public EventCallback<ItemViewModel> OnItemSelected { get; set; }
@@ -51,43 +41,39 @@
     private ItemViewModel? selectedItem = null;
 
     private ItemViewModel? currentItem = null;
-    private int currentItemIndex = 1;
+    private int currentItemIndex = -1;
 
     private string _userInput = string.Empty;
 
-    public string userInput {
-        get => _userInput;
-        set
+    private async Task OnInput(ChangeEventArgs args)
+    {
+        _userInput = args.Value?.ToString() ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(_userInput) && SearchFunction != null)
         {
-            _userInput = value;
-
-            if (!string.IsNullOrWhiteSpace(_userInput) && SearchFunction is not null)
+            if (this.selectedItem?.Name != _userInput)
             {
-                if (this.selectedItem?.Name != _userInput)
-                {
-                    searchResults = SearchFunction(_userInput);
+                searchResults = await SearchFunction(_userInput);
+                this.selectedItem = null;
 
-                    this.selectedItem = null;
-                }
+                StateHasChanged();
             }
-            else
-            {
-                ClearCurrentItem();
-            }
+        }
+        else
+        {
+            ClearCurrentItem();
         }
     }
 
-    private void OnSelectItem(ItemViewModel? item)
+    private async Task OnSelectItem(ItemViewModel? item)
     {
-
         ClearCurrentItem();
 
-        if (item is not null)
+        if (item != null)
         {
             this.selectedItem = item;
-            this.userInput = item.Name;
-
-            OnItemSelected.InvokeAsync(item);
+            this._userInput = item.Name;
+            await OnItemSelected.InvokeAsync(item);
         }
     }
 
@@ -98,14 +84,13 @@
         currentItemIndex = -1;
     }
 
-    private void OnPressKey(KeyboardEventArgs e)
+    private async Task OnPressKeys(KeyboardEventArgs e)
     {
-        if ((e.Code == "ArrowDown" || e.Code == "ArrowUp") && searchResults is not null && searchResults.Count > 0)
+        if ((e.Code == "ArrowDown" || e.Code == "ArrowUp") && searchResults != null && searchResults.Count > 0)
         {
             if (e.Code == "ArrowDown" && currentItemIndex < searchResults.Count - 1)
             {
                 currentItem = searchResults[++currentItemIndex];
-
             }
             else if (e.Code == "ArrowUp")
             {
@@ -120,7 +105,7 @@
         }
         else if (e.Code == "Enter" || e.Code == "NumpadEnter")
         {
-            OnSelectItem(currentItem);
+            await OnSelectItem(currentItem);
         }
     }
 
@@ -129,5 +114,4 @@
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
-    }
-
+}

@@ -52,7 +52,7 @@
     private Inventory selectedInventory = null;
 
     private async Task Purchase()
-    { 
+    {
         await PurchaseInventoryUseCase.ExecuteAsync(
             this.purchaseViewModel.PONumber,
             this.selectedInventory,
@@ -64,10 +64,10 @@
         this.selectedInventory = null;
     }
 
-    private List<ItemViewModel>? SearchInventory(string name)
+    private async Task<List<ItemViewModel>?> SearchInventory(string name)
     {
-        var list = ViewInventoriesByNameUseCase.ExecuteAsync(name).GetAwaiter().GetResult();
-        if (list is null) return null;
+        var list = await ViewInventoriesByNameUseCase.ExecuteAsync(name);
+        if (list == null) return null;
 
         return list.Select(x => new ItemViewModel { Id = x.InventoryId, Name = x.InventoryName })?.ToList();
     }
